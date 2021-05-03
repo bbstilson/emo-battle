@@ -6,9 +6,9 @@ import $file.models
 import models._
 
 // Order in this list matters. Bands are recursively matched pair-wise.
-// For example, [a, b, c, d] == (a vs b) vs (c vs d)
+// For example, [a, b, c, d] == ((a vs b) vs (c vs d))
 // format: off
-val bandNames: List[(String, Int)] = List(
+val bandNames: List[String] = List(
   "blink-182", "home grown", "a day to remember", "coheed and cambria",
   "panic! at the disco", "from first to last", "the used", "hawthorne heights",
   "simple plan", "bayside", "yellowcard", "the rocket Summer",
@@ -25,15 +25,15 @@ val bandNames: List[(String, Int)] = List(
   "the all-american rejects", "silverstein", "the get up kids", "four year strong",
   "mayday parade", "the early november", "all time low", "matchbook romance",
   "the ataris", "the movielife", "dashboard confessionals", "allister"
-).zipWithIndex
+)
 // format: on
 
 val BANDS_DATA_FILE = os.pwd / "bands-data.jsonl"
 
 def getBands(): List[Band] = bandNames
-  .map { case (artist, id) =>
+  .map { artist =>
     Thread.sleep(100) // An attempt at being respecful of api rate limits uwu.
-    spotify.Api.getArtistTournamentInfo(artist).copy(id = id)
+    spotify.Api.getArtistTournamentInfo(artist)
   }
   // Cache bands for repeat runs.
   .tapEach(b => os.write.append(BANDS_DATA_FILE, b.asJson.noSpaces + "\n"))
