@@ -17,10 +17,6 @@ def buildTournament(battles: List[Tournament]): Tournament = battles match {
     }
 }
 
-// printTournament(tournament)
-
-def bandToScore(b: Band): Long = b.popularity * b.followers.toLong
-
 def bandBattle(b1: Band, b2: Band, tier: Int): Band = {
   val padding = ("- - " * tier) + " "
   val winner = if (b1.score > b2.score) b1 else b2

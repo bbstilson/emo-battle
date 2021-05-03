@@ -93,6 +93,6 @@ Champion: Green Day!
 
 ## How does it work?
 
-Data about each band is gathered from the Spotify API. The only relevant numbers I could find in Spotify's data was "populatity" (whatever that means) and "monthly listens". (Ideally, we could get total plays, but they don't expose that data.)
+Data about each band is gathered from the Spotify API and cached locally (already cached in this repo so you shouldn't need to worry about downloading anything). The only relevant numbers I could find in Spotify's data was "populatity" (whatever that means) and "monthly listens". (Ideally, we could get total plays, but they don't expose that data.)
 
 Popularity and monthly listens are multiplied together to produce a band score. The band with the highest score wins.

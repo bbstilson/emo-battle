@@ -1,16 +1,14 @@
 import $ivy.`io.circe::circe-core:0.13.0`
 import $ivy.`io.circe::circe-generic:0.13.0`
 import $ivy.`io.circe::circe-parser:0.13.0`
-import $ivy.`io.circe::circe-optics:0.13.0`
+import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 
 import java.util.Base64
 import java.nio.charset.StandardCharsets
 
 import $file.models
 import models.Band
-import models.Spotify._
-
-import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+import Models._
 
 object Api {
 
@@ -34,7 +32,10 @@ object Api {
   private val authToken =
     decode[AuthTokenReponse](authTokenResp.text()).map(_.access_token).right.get
 
+  val VALID_GENRE_SUBSTRINGS = List("emo", "screamo", "punk")
+
   def getArtistTournamentInfo(artistName: String): Band = {
+    // See: https://developer.spotify.com/documentation/web-api/reference/#category-search
     val cleanedArtist = artistName.replace(" ", "%20")
     val resp = requests
       .get(
@@ -51,10 +52,14 @@ object Api {
         throw err
       }
       case Right(response) => {
-        val genres = List("emo", "screamo", "punk")
 
         val artist = response.artists.items
-          .find(_.genres.exists(genre => genres.find(g => genre.contains(g)).isDefined))
+          // This is gross, but sometimes more popular bands with a similar name show up first
+          // due to heuristics in Spotify's search API. We do our best here to grab the first
+          // artist that matches one of the genres above.
+          .find(
+            _.genres.exists(genre => VALID_GENRE_SUBSTRINGS.find(g => genre.contains(g)).isDefined)
+          )
           .getOrElse {
             println(artistName)
             response.artists.items.map(_.genres).foreach(println)
@@ -64,4 +69,31 @@ object Api {
       }
     }
   }
+}
+
+object Models {
+  case class AuthTokenReponse(access_token: String)
+  case class Image(height: Int, width: Int, url: String)
+  case class Followers(total: Int)
+
+  case class ArtistItem(
+    genres: List[String],
+    followers: Followers,
+    href: String,
+    id: String,
+    images: List[Image],
+    name: String,
+    popularity: Int,
+    `type`: String,
+    uri: String
+  )
+
+  case class SearchRseponseArtists(
+    href: String,
+    items: List[ArtistItem]
+  )
+
+  case class SearchResponse(
+    artists: SearchRseponseArtists
+  )
 }
